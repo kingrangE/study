@@ -1,15 +1,26 @@
-"""RAG의 전 과정을 간단하게 실습합니다."""
+"""다양한 Document Loader를 실습합니다."""
+
+# 1. Web Base Loader
+import bs4
 from langchain_community.document_loaders import WebBaseLoader
+urls = ['https://tired-o.github.io/posts/github-blog-1/','https://blog.twitch.tv/en/2021/07/16/ubisofts-immortals-fenyx-rising-extension-creators-see-more-hours-watched-and-engagement/']
 
-#이동욱 개발자님의 블로그 글을 가져옵니다.
-url = "https://jojoldu.tistory.com/816"
-urls = ["https://wikidocs.net/231393","https://wikidocs.net/231364"]
-loader = WebBaseLoader(urls) #web_path: Union[str, Sequence[str]] = "", (url 1개도 되고 여러 개도 가능합니다.)
+loader = WebBaseLoader(urls,bs_kwargs=dict(
+    parse_only = bs4.SoupStrainer(
+        class_ = ("prompt-info") # 지정한 class를 가진 요소만 선택하여 파싱하도록 합니다.
+    )
+))
 
-# loader객체에 있는 url을 Documents로 변환하여 docs 변수에 저장합니다.
-docs = loader.load() 
+docs = loader.load()
+print(len(docs))
+print(docs)
 
-print(docs) # Document객체가 들어있는 리스트가 반환됩니다. (def load(self) -> list[Document]:)
-print(len(docs)) # 리스트의 길이를 반환합니다. (url의 개수와 같습니다.)
-print(len(docs[0].page_content)) # 리스트 첫 Document의 page 내용의 길이를 확인합니다.
-print(docs[0].page_content[1000:2000]) # 첫 Document의 1000~2000번째 text를 출력합니다.
+# 2. Text Loader
+from langchain_community.document_loaders import TextLoader
+
+loader = TextLoader('history.txt')
+data = loader.load()
+print(type(data))
+print(len(data))
+print(data)
+print(data[0].metadata)
